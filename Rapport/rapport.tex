@@ -1,0 +1,232 @@
+\documentclass{RapportINPTCLOUD}
+
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+
+% Code listing style
+\lstdefinestyle{code}{
+  backgroundcolor=\color{gray!10},
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{gray!40},
+  tabsize=2,
+  showstringspaces=false,
+  captionpos=b
+}
+
+% Report information
+\UE{Big Data -- INE2 2026}
+\sujet{ETL Pipeline}
+\titre{Lab 2 -- MySQL to HDFS (Medallion Architecture)}
+\Encadrants{Pr. R. MARGHOUBI}
+\eleves{Alae Eddine JAHID\\Anass FAJOUI}
+
+\begin{document}
+
+\fairemarges
+\fairepagedegarde
+\tabledematieres
+
+%---------------------------------------------------------------
+\section{Introduction}
+%---------------------------------------------------------------
+
+L'objectif de ce lab est de concevoir et mettre en oeuvre un pipeline ETL complet allant d'une base de donn\'{e}es MySQL vers HDFS, en suivant l'architecture Medallion (Bronze / Silver / Gold). Le cas d'\'{e}tude porte sur une base de donn\'{e}es retail contenant des informations sur les clients, commandes, produits, cat\'{e}gories et d\'{e}partements.
+
+%---------------------------------------------------------------
+\section{PART 1 -- Environment Setup}
+%---------------------------------------------------------------
+
+\subsection{Q1 : Composants requis pour le pipeline}
+
+Pour construire ce pipeline ETL (MySQL $\rightarrow$ HDFS) avec Docker, les composants suivants sont n\'{e}cessaires :
+
+\begin{enumerate}[leftmargin=2em]
+    \item \textbf{MySQL} -- Base de donn\'{e}es source contenant la base \texttt{retail\_db}.
+    \item \textbf{HDFS NameNode} -- G\`{e}re les m\'{e}tadonn\'{e}es du syst\`{e}me de fichiers et stocke les couches Bronze/Silver/Gold.
+    \item \textbf{HDFS DataNodes ($\times$2)} -- Stockent les blocs de donn\'{e}es r\'{e}elles.
+    \item \textbf{Spark Master} -- Coordonne les jobs Spark.
+    \item \textbf{Spark Workers ($\times$2)} -- Ex\'{e}cutent les transformations ETL (Bronze $\rightarrow$ Silver $\rightarrow$ Gold).
+    \item \textbf{Spark Client} -- Conteneur o\`{u} l'on \'{e}crit et soumet les scripts PySpark.
+\end{enumerate}
+
+\textbf{Justification :} MySQL sert de \textit{source} (extraction), HDFS de \textit{destination/stockage} pour les 3 couches Medallion (chargement), et Spark de \textit{moteur de traitement} pour les transformations et les analyses (transformation + requ\^{e}tes). Le Spark Client doit pouvoir communiquer avec MySQL via JDBC pour l'extraction des donn\'{e}es.
+
+\subsection{Q2 : Docker Compose}
+
+% TODO: Insert docker-compose.yml content
+
+\subsection{Q3 : Cr\'{e}ation des tables avec retail\_db.sql}
+
+% TODO: Document the MySQL setup
+
+%---------------------------------------------------------------
+\section{PART 2 -- Data Extraction (MySQL to HDFS Bronze Layer)}
+%---------------------------------------------------------------
+
+\subsection{Q4 : Extraction compl\`{e}te d'une table vers HDFS}
+
+% TODO
+
+\subsection{Q5 : Formats de stockage dans HDFS (CSV, JSON, Parquet)}
+
+% TODO
+
+\subsection{Q6 : Structure de r\'{e}pertoires HDFS pour Bronze}
+
+% TODO
+
+\subsection{Q7 : V\'{e}rification de l'ingestion des donn\'{e}es}
+
+% TODO
+
+\subsection{Q8 : Chargements incr\'{e}mentaux depuis MySQL}
+
+% TODO
+
+%---------------------------------------------------------------
+\section{PART 3 -- Data Transformation (Bronze to Silver)}
+%---------------------------------------------------------------
+
+\subsection{Q9 : Suppression des doublons}
+
+% TODO
+
+\subsection{Q10 : Gestion des valeurs manquantes ou nulles}
+
+% TODO
+
+\subsection{Q11 : Standardisation des formats de date}
+
+% TODO
+
+\subsection{Q12 : Filtrage des transactions invalides}
+
+% TODO
+
+\subsection{Q13 : Jointure de plusieurs tables}
+
+% TODO
+
+\subsection{Q14 : Format de fichier recommand\'{e} pour Silver}
+
+% TODO
+
+\subsection{Q15 : Partitionnement des donn\'{e}es dans HDFS}
+
+% TODO
+
+%---------------------------------------------------------------
+\section{PART 4 -- Data Modeling (Silver to Gold)}
+%---------------------------------------------------------------
+
+\subsection{Q16 : Table de faits pour les ventes}
+
+% TODO
+
+\subsection{Q17 : Dimensions (temps, client, produit, magasin)}
+
+% TODO
+
+\subsection{Q18 : Agr\'{e}gation des donn\'{e}es pour le reporting}
+
+% TODO
+
+%---------------------------------------------------------------
+\section{PART 5 -- Multidimensional Analysis (SQL / Spark)}
+%---------------------------------------------------------------
+
+\subsubsection*{Basic Queries}
+
+\subsection{Q19 : Revenu total par mois}
+
+% TODO
+
+\subsection{Q20 : Revenu total par cat\'{e}gorie de produit}
+
+% TODO
+
+\subsection{Q21 : Top 10 clients par revenu}
+
+% TODO
+
+\subsection{Q22 : Produits les plus vendus}
+
+% TODO
+
+\subsubsection*{Intermediate OLAP Queries}
+
+\subsection{Q23 : Revenu par r\'{e}gion et par mois}
+
+% TODO
+
+\subsection{Q24 : Valeur moyenne de commande par client}
+
+% TODO
+
+\subsection{Q25 : Contribution au revenu (\%) par cat\'{e}gorie}
+
+% TODO
+
+\subsection{Q26 : Tendances saisonni\`{e}res}
+
+% TODO
+
+\subsubsection*{Advanced Multidimensional Queries}
+
+\subsection{Q27 : ROLLUP sur (year, month, category)}
+
+% TODO
+
+\subsection{Q28 : CUBE sur (region, product\_category)}
+
+% TODO
+
+\subsection{Q29 : Croissance ann\'{e}e apr\`{e}s ann\'{e}e}
+
+% TODO
+
+\subsection{Q30 : Totaux cumul\'{e}s (revenu cumulatif)}
+
+% TODO
+
+\subsection{Q31 : Classement des produits par cat\'{e}gorie}
+
+% TODO
+
+\subsubsection*{Business-Oriented Questions}
+
+\subsection{Q32 : Clients avec tendances d'achat d\'{e}croissantes}
+
+% TODO
+
+\subsection{Q33 : Produits \`{a} haut revenu mais faible volume}
+
+% TODO
+
+\subsection{Q34 : R\'{e}gions sous-performantes}
+
+% TODO
+
+\subsection{Q35 : Customer Lifetime Value (CLV)}
+
+% TODO
+
+\subsection{Q36 : Cat\'{e}gories g\'{e}n\'{e}rant le plus de profit}
+
+% TODO
+
+%---------------------------------------------------------------
+\section{Conclusion}
+%---------------------------------------------------------------
+
+% TODO
+
+\end{document}

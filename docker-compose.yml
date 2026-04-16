@@ -1,0 +1,132 @@
+version: "3.8"
+
+services:
+
+  # ======================
+  # MYSQL
+  # ======================
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    hostname: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=retail_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./retail_db.sql:/docker-entrypoint-initdb.d/retail_db.sql
+
+  # ======================
+  # HDFS - NAMENODE
+  # ======================
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    hostname: namenode
+    environment:
+      - CLUSTER_NAME=lab
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+    ports:
+      - "9870:9870"
+    volumes:
+      - namenode:/hadoop/dfs/name
+
+  # ======================
+  # HDFS - DATANODE 1
+  # ======================
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode1
+    hostname: datanode1
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - SERVICE_PRECONDITION=namenode:9000
+    depends_on:
+      - namenode
+    volumes:
+      - datanode1:/hadoop/dfs/data
+
+  # ======================
+  # HDFS - DATANODE 2
+  # ======================
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    hostname: datanode2
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - SERVICE_PRECONDITION=namenode:9000
+    depends_on:
+      - namenode
+    volumes:
+      - datanode2:/hadoop/dfs/data
+
+  # ======================
+  # SPARK MASTER
+  # ======================
+  spark-master:
+    image: apache/spark:3.5.0
+    container_name: spark-master
+    hostname: spark-master
+    command: >
+      bash -c "
+      /opt/spark/sbin/start-master.sh &&
+      tail -f /opt/spark/logs/*"
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+
+  # ======================
+  # SPARK WORKER 1
+  # ======================
+  spark-worker1:
+    image: apache/spark:3.5.0
+    container_name: spark-worker1
+    hostname: spark-worker1
+    depends_on:
+      - spark-master
+    command: >
+      bash -c "
+      sleep 10 &&
+      /opt/spark/sbin/start-worker.sh spark://spark-master:7077 &&
+      tail -f /opt/spark/logs/*"
+
+  # ======================
+  # SPARK WORKER 2
+  # ======================
+  spark-worker2:
+    image: apache/spark:3.5.0
+    container_name: spark-worker2
+    hostname: spark-worker2
+    depends_on:
+      - spark-master
+    command: >
+      bash -c "
+      sleep 10 &&
+      /opt/spark/sbin/start-worker.sh spark://spark-master:7077 &&
+      tail -f /opt/spark/logs/*"
+
+  # ======================
+  # SPARK CLIENT
+  # ======================
+  spark-client:
+    image: apache/spark:3.5.0
+    container_name: spark-client
+    hostname: spark-client
+    stdin_open: true
+    tty: true
+    depends_on:
+      - spark-master
+      - namenode
+      - mysql
+    ports:
+      - "4040:4040"
+    command: tail -f /dev/null
+
+volumes:
+  mysql_data:
+  namenode:
+  datanode1:
+  datanode2:
